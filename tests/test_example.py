@@ -3,7 +3,7 @@ from threading import Event
 
 import pytest
 
-from src.ischedule.ischedule import reset, run_loop, schedule
+from src.ischedule.ischedule import reset, run_loop, schedule, Scheduler
 
 
 def test_example():
@@ -36,3 +36,38 @@ def test_example():
 def reset_scheduler():
     print("reset")
     reset()
+
+
+@pytest.fixture()
+def get_scheduler():
+    return Scheduler()
+
+
+def test_example_cl(get_scheduler):
+    sch = get_scheduler
+    print("reset")
+    sch.reset()
+
+    start_time = time.time()
+    stop_event = Event()
+
+    def task_1():
+        dt = time.time() - start_time
+        print(f"Started a _fast_ task at t={dt:.3f}")
+        if dt > 3:
+            stop_event.set()
+
+    def task_2():
+        dt = time.time() - start_time
+        print(f"Started a *slow* task at t={dt:.3f}")
+
+        if dt < 2:
+            time.sleep(0.91)
+        else:
+            time.sleep(0.09)
+
+    sch.schedule(task_1, interval=0.1)
+    sch.schedule(task_2, interval=0.5)
+
+    sch.run_loop(stop_event=stop_event)
+    print("Finished")
