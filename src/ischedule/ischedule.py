@@ -19,6 +19,10 @@ class _Task:
 
 class Scheduler:
     def __init__(self):
+        """Class based scheduler that allows using multiple schedulers e.g. in multiple threads.
+
+        BUT: Be aware of the GIL! The tasks of all schedulers must finish in time to allow switching to the next task in time.
+        """
         self._tasks: List[_Task] = []
 
     def reset(self):
